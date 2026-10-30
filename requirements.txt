@@ -1,0 +1,7 @@
+pandas
+numpy
+matplotlib
+PySide6
+# ниже — только для разработки и проверки, в программу (.exe) не входят
+scikit-learn    # эталон для сверки алгоритмов (check_core.py)
+python-docx     # генерация таблиц для РПЗ (make_tables.py)
