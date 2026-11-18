@@ -1,4 +1,4 @@
-"""Классы Metrics и MetricsCalculator — показатели качества."""
+"""Классы Metrics и MetricsCalculator – показатели качества."""
 
 from dataclasses import dataclass
 
@@ -33,7 +33,7 @@ class MetricsCalculator:
         y, y_hat = np.asarray(y, float), np.asarray(y_hat, float)
         ss_res = np.sum((y - y_hat) ** 2)
         ss_tot = np.sum((y - y.mean()) ** 2)
-        if ss_tot == 0:  # все y одинаковые — R² не определён
+        if ss_tot == 0:  # все y одинаковые – R² не определён
             return float("nan")
         return float(1 - ss_res / ss_tot)
 

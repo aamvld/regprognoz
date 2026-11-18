@@ -1,4 +1,4 @@
-"""Класс ModelParams — параметры моделирования (п. 4.1.2.3 ТЗ)."""
+"""Класс ModelParams – параметры моделирования (п. 4.1.2.3 ТЗ)."""
 
 from dataclasses import dataclass, field
 

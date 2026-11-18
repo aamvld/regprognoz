@@ -1,4 +1,4 @@
-"""Класс PlotBuilder — график «фактические – прогнозные значения»."""
+"""Класс PlotBuilder – график «фактические – прогнозные значения»."""
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -8,7 +8,7 @@ from core.result import ModelResult
 
 
 class PlotBuilder:
-    """Строит диаграмму рассеяния для тестовой выборки.
+    """Строит точечный график для тестовой выборки.
 
     Используется matplotlib.figure.Figure (без pyplot), чтобы график
     можно было встроить в окно программы.
@@ -22,12 +22,12 @@ class PlotBuilder:
         ax = fig.add_subplot(111)
 
         y, y_hat = np.asarray(r.y_test), np.asarray(r.y_pred)
-        ax.scatter(y, y_hat, s=18, alpha=0.7, label="Наблюдения тестовой выборки")
+        ax.scatter(y, y_hat, s=18, alpha=0.7, color="#0D4CD3", label="Наблюдения тестовой выборки")
 
-        # Линия идеального прогноза: точки на ней — прогноз точно равен факту
+        # Линия идеального прогноза: точки на ней – прогноз точно равен факту
         lo = float(min(y.min(), y_hat.min()))
         hi = float(max(y.max(), y_hat.max()))
-        ax.plot([lo, hi], [lo, hi], "r--", linewidth=1.5,
+        ax.plot([lo, hi], [lo, hi], "--", color="#EE3F58", linewidth=1.5,
                 label="Идеальный прогноз (ŷ = y)")
 
         ax.set_xlabel(f"Фактическое значение «{r.params.target}»")

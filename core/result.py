@@ -1,4 +1,4 @@
-"""Класс ModelResult — результат обучения одной модели."""
+"""Класс ModelResult – результат построения одной модели."""
 
 from dataclasses import dataclass
 
@@ -18,7 +18,7 @@ class ModelResult:
     y_pred: np.ndarray          # прогнозные значения тестовой выборки
 
     def summary_row(self) -> list:
-        """Строка сводной таблицы сравнения: алгоритм, MSE, MAE, R²."""
+        """Строка сводной таблицы сравнения: модель, MSE, MAE, R²."""
         return [ALGORITHM_NAMES[self.params.algorithm],
                 self.metrics.mse, self.metrics.mae, self.metrics.r2]
 

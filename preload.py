@@ -8,7 +8,7 @@ _SixMetaPathImporter, которого нет, и программа падае�
 AttributeError: '_SixMetaPathImporter' object has no attribute '_path'.
 
 Решение:
-1) добавляем загрузчику six недостающий атрибут _path — тогда перехватчик
+1) добавляем загрузчику six недостающий атрибут _path – тогда перехватчик
    PySide6 получает обычную «ожидаемую» ошибку и спокойно пропускает модуль;
 2) заранее загружаем используемые библиотеки (при запуске из исходников).
 В собранном .exe PyInstaller сам загружает PySide6 ещё до main.py,
@@ -17,13 +17,17 @@ AttributeError: '_SixMetaPathImporter' object has no attribute '_path'.
 стандартной настройки PySide6, и все библиотеки успевают загрузиться.
 """
 
-import six
+try:
+    import six
+except ImportError:      # новые версии dateutil уже не используют six
+    six = None
 
-if not hasattr(six._SixMetaPathImporter, "_path"):
-    six._SixMetaPathImporter._path = []
+if six is not None:
+    if not hasattr(six._SixMetaPathImporter, "_path"):
+        six._SixMetaPathImporter._path = []
+    import six.moves  # noqa: F401,E402
 
-# six и все модули dateutil, которые его используют
-import six.moves  # noqa: F401,E402
+# модули dateutil, которые используют pandas и matplotlib
 import dateutil.parser  # noqa: F401
 import dateutil.relativedelta  # noqa: F401
 import dateutil.rrule  # noqa: F401

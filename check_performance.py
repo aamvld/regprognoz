@@ -4,7 +4,7 @@
 Скрипт создаёт наборы данных максимального размера, замеряет время операций
 (каждая повторяется 3 раза, в таблицу идёт ХУДШИЙ результат) и потребление
 памяти, выводит таблицу «Требование | Факт» и сохраняет её в
-results/performance.txt — для раздела «Тестирование» РПЗ.
+results/performance.txt – для раздела «Тестирование» РПЗ.
 """
 
 import io
@@ -123,7 +123,7 @@ def measure_startup() -> float | None:
     """Время запуска из исходников: от старта Python до готового окна.
 
     Окно создаётся в невидимом режиме в отдельном процессе. Время запуска
-    собранного .exe замеряется вручную (секундомером) — см. итоговую таблицу.
+    собранного .exe замеряется вручную (секундомером) – см. итоговую таблицу.
     """
     code = (
         "import time; t0 = time.perf_counter()\n"
@@ -152,14 +152,14 @@ def collect():
     rows = []  # (операция, требование, факт, выполнено?)
 
     def add(name, limit, fact, unit="с"):
-        """limit=None — операция ТЗ не нормируется (замер справочный)."""
+        """limit=None – операция ТЗ не нормируется (замер справочный)."""
         fact_text = "н/д" if fact is None else f"{fact:.2f} {unit}"
         if limit is None:
-            rows.append((name, "не задано", fact_text, "—"))
+            rows.append((name, "не задано", fact_text, "–"))
         else:
             ok = fact is not None and fact <= limit
             rows.append((name, f"≤ {limit:g} {unit}", fact_text,
-                         "да" if ok else ("—" if fact is None else "НЕТ")))
+                         "да" if ok else ("–" if fact is None else "НЕТ")))
         print(f"  {name}: {fact_text}")
 
     print("Подготовка данных максимального размера…")
@@ -184,11 +184,11 @@ def collect():
             def train(p=p):
                 nonlocal result
                 result = ExperimentService().train(train_ds, p)
-            label = (f"Обучение: {ALGORITHM_NAMES[algo]}, 10 000 × 10, "
+            label = (f"Построение модели: {ALGORITHM_NAMES[algo]}, 10 000 × 10, "
                      f"стандартизация {'вкл.' if std else 'выкл.'}")
             add(label, 10, worst_time(train))
 
-    add("Сравнение трёх алгоритмов (справочно)", None, worst_time(
+    add("Сравнение трёх моделей (справочно)", None, worst_time(
         lambda: ExperimentService().compare(
             train_ds, ModelParams(target="y", features=features))))
 
@@ -205,7 +205,7 @@ def collect():
 
     rows.append(("Запуск установленной программы (.exe), секундомер",
                  "≤ 15 с", "заполнить вручную", ""))
-    rows.append(("Память программы (.exe) после обучения, Диспетчер задач",
+    rows.append(("Память программы (.exe) после построения модели, Диспетчер задач",
                  "≤ 1024 МБ", "заполнить вручную", ""))
 
     env = (f"Компьютер: {cpu_name()}, ОЗУ {total_ram_gb()}, "

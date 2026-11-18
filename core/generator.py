@@ -1,4 +1,4 @@
-"""Класс SyntheticGenerator — генерация синтетических данных (рис. 14)."""
+"""Класс SyntheticGenerator – генерация синтетических данных (рис. 14)."""
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ class SyntheticGenerator:
 
     def __init__(self, n_samples: int = 500, n_features: int = 3,
                  noise: float = 1.0, seed: int = 42):
-        # значения по умолчанию — из п. 4.1.2.2 ТЗ
+        # значения по умолчанию – из п. 4.1.2.2 ТЗ
         self.n_samples = n_samples
         self.n_features = n_features
         self.noise = noise

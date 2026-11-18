@@ -1,4 +1,4 @@
-"""Класс CsvReader — чтение набора данных из CSV (п. 4.1.2.1 ТЗ, рис. 12)."""
+"""Класс CsvReader – чтение набора данных из CSV (п. 4.1.2.1 ТЗ, рис. 12)."""
 
 import pandas as pd
 
@@ -20,7 +20,7 @@ class CsvReader:
     def read(self, path: str) -> Dataset:
         InputValidator.validate_file(path)
 
-        # "utf-8-sig" — тот же UTF-8, но корректно убирает метку BOM,
+        # "utf-8-sig" – тот же UTF-8, но корректно убирает метку BOM,
         # которую добавляет Excel при сохранении «CSV UTF-8».
         enc = "utf-8-sig" if self.encoding.lower() == "utf-8" else self.encoding
         try:
@@ -38,6 +38,28 @@ class CsvReader:
             raise ValidationError(
                 "Похоже, в файле разделитель «,». Требуется «;».")
 
+        # Числа с десятичной запятой («54,2») pandas читает как текст.
+        # Если в файле есть и целые столбцы, проверка числа числовых столбцов
+        # такую ошибку не заметит, поэтому ищем её явно.
+        bad = self._decimal_comma_columns(frame)
+        if bad:
+            raise ValidationError(
+                "В столбцах " + ", ".join(f"«{c}»" for c in bad) +
+                " десятичный разделитель – запятая. Требуется точка.")
+
         ds = Dataset(frame, source_path=path)
         InputValidator.validate_dataset(ds)
         return ds
+
+    @staticmethod
+    def _decimal_comma_columns(frame: pd.DataFrame) -> list[str]:
+        """Текстовые столбцы, все значения которых – числа с запятой."""
+        pattern = r"^\s*[-+]?\d+,\d+\s*$"
+        bad = []
+        for col in frame.columns:
+            if frame[col].dtype != object and str(frame[col].dtype) not in ("str", "string"):
+                continue
+            values = frame[col].dropna().astype(str)
+            if len(values) and values.str.match(pattern).all():
+                bad.append(str(col))
+        return bad

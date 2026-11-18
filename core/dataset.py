@@ -23,7 +23,7 @@ class Dataset:
         return list(self.frame.select_dtypes(include="number").columns)
 
     def preview(self, n: int = 100) -> pd.DataFrame:
-        """Первые n строк для показа в таблице (п. 4.1.1.1 ТЗ — 100 строк)."""
+        """Первые n строк для показа в таблице (п. 4.1.1.1 ТЗ – 100 строк)."""
         return self.frame.head(n)
 
     def has_missing(self, cols: list[str] | None = None) -> bool:

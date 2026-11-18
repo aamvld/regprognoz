@@ -6,12 +6,13 @@
 import sys
 import traceback
 
-# Библиотеки ОБЯЗАТЕЛЬНО загружаются раньше PySide6 (причина — в preload.py)
+# Библиотеки ОБЯЗАТЕЛЬНО загружаются раньше PySide6 (причина – в preload.py)
 import preload  # noqa: F401
 
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from ui.main_window import MainWindow
+from ui.theme import apply_theme
 
 
 def excepthook(exc_type, exc, tb):
@@ -25,7 +26,7 @@ def excepthook(exc_type, exc, tb):
 
 def main():
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")          # одинаковый вид на Windows и macOS
+    apply_theme(app)                # светлая тема, не зависит от темы Windows
     sys.excepthook = excepthook
     window = MainWindow()
     window.show()

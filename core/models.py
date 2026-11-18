@@ -8,7 +8,7 @@ from .solvers import LeastSquaresEstimator
 
 
 class RegressionModel(ABC):
-    """Общий интерфейс модели: обучение, прогноз, коэффициенты."""
+    """Общий интерфейс модели: построение, прогноз, коэффициенты."""
 
     def __init__(self):
         self._estimator = None

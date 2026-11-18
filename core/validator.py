@@ -1,4 +1,4 @@
-"""Класс InputValidator — контроль вводимой информации (п. 4.2.1 ТЗ)."""
+"""Класс InputValidator – контроль вводимой информации (п. 4.2.1 ТЗ)."""
 
 import os
 
@@ -7,7 +7,7 @@ from .errors import ValidationError
 
 
 class InputValidator:
-    """Проверки файла, столбцов и параметров. При ошибке — ValidationError."""
+    """Проверки файла, столбцов и параметров. При ошибке – ValidationError."""
 
     MIN_ROWS = 20
     MAX_ROWS = 10_000
@@ -30,14 +30,14 @@ class InputValidator:
         n = ds.row_count()
         if not (cls.MIN_ROWS <= n <= cls.MAX_ROWS):
             raise ValidationError(
-                f"Число строк в файле — {n}. Допустимо от {cls.MIN_ROWS} "
+                f"Число строк в файле – {n}. Допустимо от {cls.MIN_ROWS} "
                 f"до {cls.MAX_ROWS}.")
         k = len(ds.numeric_columns())
         if not (2 <= k <= cls.MAX_FEATURES + 1):
             raise ValidationError(
-                f"Числовых столбцов в файле — {k}. Нужно от 2 до "
+                f"Числовых столбцов в файле – {k}. Нужно от 2 до "
                 f"{cls.MAX_FEATURES + 1} (целевой + от 1 до {cls.MAX_FEATURES} "
-                f"входных). Проверьте, что десятичный разделитель — точка.")
+                f"входных). Проверьте, что десятичный разделитель – точка.")
 
     # ---------- выбор признаков ----------
     @classmethod
@@ -78,21 +78,21 @@ class InputValidator:
         if noise is None or noise < 0:
             raise ValidationError("Уровень шума должен быть неотрицательным.")
         if not isinstance(seed, int):
-            raise ValidationError("Начальное значение генератора — целое число.")
+            raise ValidationError("Начальное значение генератора – целое число.")
 
     # ---------- моделирование ----------
     @staticmethod
     def validate_model_params(p) -> None:
-        """Параметры моделирования из п. 4.1.2.3 ТЗ (p — ModelParams)."""
+        """Параметры моделирования из п. 4.1.2.3 ТЗ (p – ModelParams)."""
         if p.algorithm not in ("linear", "ridge", "lasso"):
-            raise ValidationError("Неизвестный алгоритм.")
+            raise ValidationError("Неизвестный вид модели.")
         if p.algorithm in ("ridge", "lasso") and not (p.alpha > 0):
             raise ValidationError("Параметр α должен быть больше 0.")
         if not (0.10 <= p.test_size <= 0.40):
             raise ValidationError(
                 "Доля тестовой выборки должна быть от 10 % до 40 %.")
         if not isinstance(p.seed, int):
-            raise ValidationError("Начальное значение генератора — целое число.")
+            raise ValidationError("Начальное значение генератора – целое число.")
         if p.missing_method not in ("drop", "mean"):
             raise ValidationError("Неизвестный способ обработки пропусков.")
 
@@ -103,7 +103,7 @@ class InputValidator:
         """Значения для прогноза: все заданы и являются числами (рис. 17).
 
         Принимает строки из полей ввода, возвращает словарь чисел.
-        Запятая как десятичный разделитель тоже допускается — так удобнее.
+        Запятая как десятичный разделитель тоже допускается – так удобнее.
         """
         values = {}
         for f in features:

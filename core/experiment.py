@@ -1,4 +1,4 @@
-"""Класс ExperimentService — обучение, сравнение, прогноз (рис. 15–17)."""
+"""Класс ExperimentService – построение, сравнение, прогноз (рис. 15–17)."""
 
 import numpy as np
 
@@ -22,7 +22,7 @@ class ExperimentService:
         self.model: RegressionModel | None = None
         self.last_params: ModelParams | None = None
 
-    # ---------- обучение одной модели (рис. 15) ----------
+    # ---------- построение одной модели (рис. 15) ----------
     def train(self, ds: Dataset, p: ModelParams) -> ModelResult:
         InputValidator.validate_columns(ds, p.target, p.features)
         InputValidator.validate_model_params(p)
@@ -36,12 +36,12 @@ class ExperimentService:
         # 2. Разбиение на обучающую и тестовую выборки
         X_tr, X_te, y_tr, y_te = self.preparer.split(X, y, p.test_size, p.seed)
 
-        # 3. Стандартизация (параметры — по обучающей выборке)
+        # 3. Стандартизация (параметры – по обучающей выборке)
         if p.standardize:
             self.preparer.fit_scaler(X_tr)
             X_tr, X_te = self.preparer.scale(X_tr), self.preparer.scale(X_te)
 
-        # 4. Обучение и прогноз для тестовой выборки
+        # 4. Вычисление коэффициентов и прогноз для тестовой выборки
         model = create_model(p.algorithm, p.alpha)
         model.fit(X_tr, y_tr)
         y_pred = model.predict(X_te)
@@ -50,8 +50,8 @@ class ExperimentService:
         metrics = self.calculator.compute(y_te, y_pred)
 
         # 6. Коэффициенты в исходной шкале признаков.
-        # Модель обучена на z = (x - μ)/σ: ŷ = w0 + Σ wᵢ·zᵢ.
-        # Отсюда bᵢ = wᵢ/σᵢ и b0 = w0 - Σ wᵢ·μᵢ/σᵢ — их и показываем,
+        # Модель построена по z = (x - μ)/σ: ŷ = w0 + Σ w_i·z_i.
+        # Отсюда b_i = w_i/σ_i и b0 = w0 - Σ w_i·μ_i/σ_i – их и показываем,
         # чтобы коэффициенты относились к настоящим значениям признаков.
         w0, w = model.intercept(), np.array(model.coefficients())
         if p.standardize:
@@ -65,7 +65,7 @@ class ExperimentService:
         return ModelResult(p, float(b0), [float(v) for v in b], metrics,
                            y_te, y_pred)
 
-    # ---------- сравнение трёх алгоритмов (рис. 16) ----------
+    # ---------- сравнение трёх моделей (рис. 16) ----------
     def compare(self, ds: Dataset, p: ModelParams) -> list[ModelResult]:
         results = []
         for algorithm in ("linear", "ridge", "lasso"):
@@ -76,9 +76,9 @@ class ExperimentService:
     # ---------- прогноз для одного наблюдения (рис. 17) ----------
     def predict_one(self, values: dict[str, float]) -> float:
         if self.model is None or not self.model.fitted:
-            raise ValidationError("Модель ещё не обучена.")
+            raise ValidationError("Модель ещё не построена.")
         p = self.last_params
         x = np.array([[values[f] for f in p.features]], dtype=float)
         if p.standardize:
-            x = self.preparer.scale(x)  # тот же масштаб, что при обучении
+            x = self.preparer.scale(x)  # тот же масштаб, что при построении модели
         return float(self.model.predict(x)[0])

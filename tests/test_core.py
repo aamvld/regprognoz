@@ -99,6 +99,10 @@ class TestCsvReader(TempDirMixin, unittest.TestCase):
                 p, sep=";", index=False, encoding="cp1251"),
             "empty.csv": lambda p: open(p, "w").close(),
             "onecol.csv": lambda p: make_frame(40)[["y"]].to_csv(p, sep=";", index=False),
+            # десятичная запятая при наличии целых столбцов (ошибка была
+            # незаметна: целых столбцов хватало для проверки их числа)
+            "deccomma_mixed.csv": lambda p: make_frame(40).assign(
+                k=range(40), m=range(40)).to_csv(p, sep=";", index=False, decimal=","),
         }
         for name, create in cases.items():
             with self.subTest(file=name):

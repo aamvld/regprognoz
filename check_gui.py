@@ -11,7 +11,7 @@ import tempfile
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")  # окно не показывается
 
-# Библиотеки загружаются РАНЬШЕ PySide6 — причина описана в preload.py
+# Библиотеки загружаются РАНЬШЕ PySide6 – причина описана в preload.py
 import preload  # noqa: E402, F401
 from core.generator import SyntheticGenerator  # noqa: E402
 
@@ -36,7 +36,7 @@ w = MainWindow()
 tmp = tempfile.mkdtemp()
 
 print("1. Начальное состояние (до загрузки данных)")
-check("кнопка «Обучить» недоступна", not w.btn_train.isEnabled())
+check("кнопка «Построить» недоступна", not w.btn_train.isEnabled())
 check("вкладка «Прогноз» недоступна", not w.tabs.isTabEnabled(TAB_PREDICT))
 check("сохранение отчёта недоступно", not w.act_save_txt.isEnabled())
 
@@ -48,13 +48,13 @@ QFileDialog.getOpenFileName = lambda *a, **k: (csv_path, "")
 w.on_load_csv()
 check("набор загружен, 500 строк", w.dataset is not None and w.dataset.row_count() == 500)
 check("в таблице показано 100 строк", w.tbl_preview.rowCount() == 100)
-check("цель по умолчанию — y", w.cmb_target.currentText() == "y")
+check("цель по умолчанию – y", w.cmb_target.currentText() == "y")
 check("входные признаки x1..x4", w._checked_features() == ["x1", "x2", "x3", "x4"])
-check("«Обучить» стала доступна", w.btn_train.isEnabled())
+check("«Построить» стала доступна", w.btn_train.isEnabled())
 
 print("3. Блокировки при выборе признаков")
 w._check_all(False)
-check("без входных признаков «Обучить» недоступна", not w.btn_train.isEnabled())
+check("без входных признаков «Построить» недоступна", not w.btn_train.isEnabled())
 w._check_all(True)
 w.cmb_target.setCurrentText("x1")
 check("новая цель x1 исключена из входных", "x1" not in w._checked_features())
@@ -85,7 +85,7 @@ w.on_predict()
 check("прогноз выведен", "Прогноз" in w.lbl_prediction.text())
 w.prediction_inputs["x1"].setText("abc")
 w.on_predict()
-check("на «abc» — сообщение об ошибке, без падения",
+check("на «abc» – сообщение об ошибке, без падения",
       messages and "не является числом" in messages[-1][1])
 messages.clear()
 

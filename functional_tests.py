@@ -174,7 +174,7 @@ def core_tests(F, tmp):
     def _():
         return expect_error(lambda: CsvReader().read(F["cp1251"]), "UTF-8")
 
-    @t(S, "4.1.2.1, 4.2.1", "Десятичный разделитель — запятая",
+    @t(S, "4.1.2.1, 4.2.1", "Десятичный разделитель – запятая",
        "Сообщение с подсказкой про десятичную точку")
     def _():
         return expect_error(lambda: CsvReader().read(F["deccomma"]), "точка")
@@ -201,7 +201,7 @@ def core_tests(F, tmp):
         num = ds.numeric_columns()
         return f"Числовые столбцы: {', '.join(num)}", "город" not in num and len(num) == 3
 
-    @t(S, "4.2.4", "Загрузка файла, обучение и сохранение результатов",
+    @t(S, "4.2.4", "Загрузка файла, построение модели и сохранение результатов",
        "Исходный файл не изменился (контрольная сумма совпадает)")
     def _():
         before = file_hash(F["ok"])
@@ -248,7 +248,7 @@ def core_tests(F, tmp):
         return (f"{ds.row_count()} × {ds.column_count()}; {ds.coefficients_text()}",
                 (ds.row_count(), ds.column_count()) == (500, 4))
 
-    @t(S, "4.1.2.2", "Границы: n = 20, p = 1, шум 0; обучение линейной модели",
+    @t(S, "4.1.2.2", "Границы: n = 20, p = 1, шум 0; построение линейной модели",
        "Модель находит истинные коэффициенты, R² = 1")
     def _():
         ds = SyntheticGenerator(20, 1, 0.0, 42).generate()
@@ -272,7 +272,7 @@ def core_tests(F, tmp):
             return expect_error(lambda: SyntheticGenerator(n, p, noise, 42).generate())
 
     @t(S, "4.1.2.2", "Два запуска с seed 7 и один с seed 8",
-       "При одинаковом seed данные совпадают, при разном — различаются")
+       "При одинаковом seed данные совпадают, при разном – различаются")
     def _():
         a, b, c = (SyntheticGenerator(100, 2, 1.0, s).generate().frame for s in (7, 7, 8))
         same, diff = a.equals(b), not a.equals(c)
@@ -345,14 +345,14 @@ def core_tests(F, tmp):
         return (f"R² = {a.metrics.r2:.10f} и {b.metrics.r2:.10f}",
                 abs(a.metrics.r2 - b.metrics.r2) < 1e-10)
 
-    @t(S, "4.1.1.1", "Обучение дважды с seed 42 и один раз с seed 1",
-       "При одинаковом seed результаты совпадают, при разном — различаются")
+    @t(S, "4.1.1.1", "Построение модели дважды с seed 42 и один раз с seed 1",
+       "При одинаковом seed результаты совпадают, при разном – различаются")
     def _():
         r = [ExperimentService().train(ds, ModelParams(target="y", features=feats, seed=s))
              .metrics.mse for s in (42, 42, 1)]
         return f"MSE: {fmt(r[0])}, {fmt(r[1])}, {fmt(r[2])}", r[0] == r[1] != r[2]
 
-    @t(S, "4.1.1.1", "Сравнение алгоритмов на наборе 500 × 3",
+    @t(S, "4.1.1.1", "Сравнение моделей на наборе 500 × 3",
        "Сводная таблица из 3 строк, одинаковая тестовая выборка")
     def _():
         rs = ExperimentService().compare(ds, ModelParams(target="y", features=feats))
@@ -363,7 +363,7 @@ def core_tests(F, tmp):
 
     S = "Прогнозирование"
 
-    @t(S, "4.1.1.1, 4.1.2.4", "Обученная модель; x1 = 1, x2 = 0,5, x3 = −2",
+    @t(S, "4.1.1.1, 4.1.2.4", "Построенная модель; x1 = 1, x2 = 0,5, x3 = −2",
        "Прогноз равен b0 + b1·x1 + b2·x2 + b3·x3")
     def _():
         svc = ExperimentService()
@@ -384,14 +384,14 @@ def core_tests(F, tmp):
         return expect_error(lambda: InputValidator.validate_prediction_input(
             {"x1": "abc", "x2": "1", "x3": "2"}, feats), "не является числом")
 
-    @t(S, "4.2.2", "Прогноз без обучения модели", "Сообщение: модель не обучена")
+    @t(S, "4.2.2", "Прогноз без построения модели", "Сообщение: модель не построена")
     def _():
-        return expect_error(lambda: ExperimentService().predict_one({"x1": 1}), "не обучена")
+        return expect_error(lambda: ExperimentService().predict_one({"x1": 1}), "не построена")
 
     S = "Визуализация и экспорт"
     r = ExperimentService().train(ds, ModelParams(algorithm="ridge", target="y", features=feats))
 
-    @t(S, "4.1.1.1", "Обученная модель; построение графика",
+    @t(S, "4.1.1.1", "Построенная модель; построение графика",
        "График: точки тестовой выборки и линия ŷ = y")
     def _():
         ax = PlotBuilder.actual_vs_predicted(r).axes[0]
@@ -445,7 +445,7 @@ def gui_tests(F):
         from ui.main_window import TAB_PLOT, TAB_PREDICT, MainWindow
     except ImportError as e:
         reason = f"не выполнен: {e}"
-        return [("Интерфейс", "4.2.2", "—", "—", lambda: (reason, None))]
+        return [("Интерфейс", "4.2.2", "–", "–", lambda: (reason, None))]
 
     messages = []
     QMessageBox.warning = lambda *a: messages.append(a[2])
@@ -468,35 +468,36 @@ def gui_tests(F):
             return fn
         return deco
 
-    def yn(x):
-        return "доступна" if x else "недоступна"
+    def yn(x, end="а"):
+        """«доступна/доступно/доступны» – окончание по роду слова."""
+        return ("доступн" if x else "недоступн") + end
 
     @t("4.2.2", "Запуск программы, данные не загружены",
-       "«Обучить», «Прогноз», «График», сохранение недоступны")
+       "«Построить», «Прогноз», «График», сохранение недоступны")
     def _():
         w = window()
         st = [w.btn_train.isEnabled(), w.tabs.isTabEnabled(TAB_PREDICT),
               w.tabs.isTabEnabled(TAB_PLOT), w.act_save_txt.isEnabled()]
-        return (f"«Обучить» {yn(st[0])}, вкладки прогноза/графика "
-                f"{'доступны' if st[1] or st[2] else 'недоступны'}, сохранение {yn(st[3])}",
+        return (f"«Построить» {yn(st[0])}, вкладки прогноза/графика "
+                f"{'доступны' if st[1] or st[2] else 'недоступны'}, сохранение {yn(st[3], 'о')}",
                 not any(st))
 
     @t("4.1.1.1, 4.2.2", "Загрузка корректного файла через диалог",
-       "Показаны 100 строк, число строк и столбцов; «Обучить» доступна")
+       "Показаны 100 строк, число строк и столбцов; «Построить» доступна")
     def _():
         load("ok")
         w = window()
         return (f"{w.lbl_data_info.text()} Строк в таблице: {w.tbl_preview.rowCount()}; "
-                f"«Обучить» {yn(w.btn_train.isEnabled())}",
+                f"«Построить» {yn(w.btn_train.isEnabled())}",
                 w.tbl_preview.rowCount() == 100 and w.btn_train.isEnabled())
 
-    @t("4.2.2", "Сняты все входные признаки", "«Обучить» недоступна")
+    @t("4.2.2", "Сняты все входные признаки", "«Построить» недоступна")
     def _():
         w = window()
         w._check_all(False)
         res = not w.btn_train.isEnabled()
         w._check_all(True)
-        return f"«Обучить» {yn(not res)}", res
+        return f"«Построить» {yn(not res)}", res
 
     @t("4.2.2", "Выбран целевой признак x1",
        "x1 исключён из входных и недоступен для отметки")
@@ -513,7 +514,7 @@ def gui_tests(F):
         return (f"Входные: {', '.join(feats)}; пункт x1 {'доступен' if enabled else 'недоступен'}",
                 "x1" not in feats and not enabled)
 
-    @t("4.1.2.3", "Выбор алгоритма: линейная, затем Ridge",
+    @t("4.1.2.3", "Выбор модели: линейная, затем Ridge",
        "Поле α недоступно для линейной и доступно для Ridge")
     def _():
         w = window()
@@ -524,7 +525,7 @@ def gui_tests(F):
         return f"Линейная: α {'доступно' if a else 'недоступно'}; Ridge: α " \
                f"{'доступно' if b else 'недоступно'}", (not a) and b
 
-    @t("4.2.2", "Нажата «Обучить модель»",
+    @t("4.2.2", "Нажата «Построить модель»",
        "Выведены результаты; прогноз, график и сохранение стали доступны")
     def _():
         w = window()
@@ -536,7 +537,7 @@ def gui_tests(F):
                 f"прогноз/график/сохранение {'доступны' if all(st[1:4]) else 'недоступны'}",
                 all(st) and not messages)
 
-    @t("4.1.1.1", "Нажата «Сравнить алгоритмы»", "Таблица сравнения из 3 строк")
+    @t("4.1.1.1", "Нажата «Сравнить модели»", "Таблица сравнения из 3 строк")
     def _():
         w = window()
         w.on_compare()
@@ -561,17 +562,17 @@ def gui_tests(F):
         messages.clear()
         load("comma")
         return (f"Сообщение: «{messages[-1]}»; набор: {w.dataset.row_count()} строк, "
-                f"модель {'обучена' if w.trained else 'сброшена'}",
+                f"модель {'построена' if w.trained else 'сброшена'}",
                 bool(messages) and w.dataset.row_count() == 500 and w.trained)
 
-    @t("4.2.2", "Загрузка нового корректного набора после обучения",
+    @t("4.2.2", "Загрузка нового корректного набора после построения модели",
        "Модель сброшена; прогноз, график и сохранение снова недоступны")
     def _():
         w = window()
         load("rows20")
         st = [w.trained, w.tabs.isTabEnabled(TAB_PREDICT), w.act_save_txt.isEnabled()]
-        return (f"Модель {'обучена' if st[0] else 'сброшена'}; прогноз "
-                f"{yn(st[1])}; сохранение {yn(st[2])}", not any(st))
+        return (f"Модель {'построена' if st[0] else 'сброшена'}; вкладка «Прогноз» "
+                f"{yn(st[1])}; сохранение {yn(st[2], 'о')}", not any(st))
 
     @t("4.1.1.1, 5.2", "Меню «Справка» (F1)",
        "Окно справки с описанием функций и формата входного файла")

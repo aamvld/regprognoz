@@ -1,4 +1,4 @@
-"""Класс MainWindow — главное окно программы «РегПрогноз».
+"""Класс MainWindow – главное окно программы «РегПрогноз».
 
 Главное окно хранит текущие набор данных, параметры и результаты,
 вызывает подсистемы ядра и блокирует недопустимые действия (п. 4.2.2 ТЗ).
@@ -8,7 +8,7 @@ import os
 import time
 from functools import wraps
 
-# Модули ядра (а с ними pandas) импортируются РАНЬШЕ PySide6 —
+# Модули ядра (а с ними pandas) импортируются РАНЬШЕ PySide6 –
 # иначе PySide6 конфликтует с библиотекой six (см. main.py).
 from core.csv_reader import CsvReader
 from core.dataset import Dataset, SyntheticDataset
@@ -33,6 +33,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ui import theme
 from ui.help_window import HelpWindow
 
 # Номера вкладок
@@ -42,8 +43,8 @@ TAB_DATA, TAB_GEN, TAB_MODEL, TAB_COMPARE, TAB_PREDICT, TAB_PLOT = range(6)
 def safe(func):
     """Декоратор для обработчиков кнопок: программа не падает (п. 4.2.3 ТЗ).
 
-    ValidationError — ожидаемая ошибка ввода: показываем причину.
-    Любая другая ошибка — непредвиденная: тоже показываем, работа продолжается.
+    ValidationError – ожидаемая ошибка ввода: показываем причину.
+    Любая другая ошибка – непредвиденная: тоже показываем, работа продолжается.
     """
     @wraps(func)
     def wrapper(self, *args):
@@ -51,7 +52,7 @@ def safe(func):
             return func(self)
         except ValidationError as e:
             QMessageBox.warning(self, "Ошибка ввода", str(e))
-        except Exception as e:  # noqa: BLE001 — защита от аварийного завершения
+        except Exception as e:  # noqa: BLE001 – защита от аварийного завершения
             QMessageBox.critical(
                 self, "Ошибка", f"Непредвиденная ошибка: {e}\n\n"
                                 "Работа программы продолжается.")
@@ -69,7 +70,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("РегПрогноз — прогнозирование на основе регрессионного анализа")
+        self.setWindowTitle("РегПрогноз – прогнозирование на основе регрессионного анализа")
         self.resize(1200, 720)          # помещается в экран 1366×768
         self.setMinimumSize(1000, 640)
 
@@ -78,7 +79,7 @@ class MainWindow(QMainWindow):
         self.generated: SyntheticDataset | None = None
         self.params = ModelParams()
         self.results: list[ModelResult] = []   # результаты сравнения
-        self.result: ModelResult | None = None  # последняя обученная модель
+        self.result: ModelResult | None = None  # последняя построенная модель
         self.trained = False
         self.service = ExperimentService()
         self.reader = CsvReader()
@@ -129,6 +130,7 @@ class MainWindow(QMainWindow):
 
         top = QHBoxLayout()
         btn_load = QPushButton("Загрузить CSV…")
+        btn_load.setProperty("kind", "primary")
         btn_load.clicked.connect(self.on_load_csv)
         btn_gen = QPushButton("Сгенерировать данные…")
         btn_gen.clicked.connect(lambda: self.tabs.setCurrentIndex(TAB_GEN))
@@ -173,6 +175,7 @@ class MainWindow(QMainWindow):
 
         row = QHBoxLayout()
         btn = QPushButton("Сгенерировать")
+        btn.setProperty("kind", "primary")
         btn.clicked.connect(self.on_generate)
         self.btn_save_gen = QPushButton("Сохранить данные в CSV…")
         self.btn_save_gen.clicked.connect(self.on_save_generated)
@@ -240,7 +243,7 @@ class MainWindow(QMainWindow):
         self.cmb_missing = QComboBox()
         self.cmb_missing.addItem("удаление строк с пропусками", "drop")
         self.cmb_missing.addItem("замена средним значением", "mean")
-        form.addRow("Алгоритм:", self.cmb_algo)
+        form.addRow("Модель регрессии:", self.cmb_algo)
         form.addRow("Параметр α:", self.sp_alpha)
         form.addRow("Стандартизация:", self.chk_std)
         form.addRow("Доля тестовой выборки:", self.sp_test)
@@ -249,9 +252,10 @@ class MainWindow(QMainWindow):
         left.addWidget(box_p)
 
         row2 = QHBoxLayout()
-        self.btn_train = QPushButton("Обучить модель")
+        self.btn_train = QPushButton("Построить модель")
+        self.btn_train.setProperty("kind", "primary")
         self.btn_train.clicked.connect(self.on_train)
-        self.btn_compare = QPushButton("Сравнить алгоритмы")
+        self.btn_compare = QPushButton("Сравнить модели")
         self.btn_compare.clicked.connect(self.on_compare)
         row2.addWidget(self.btn_train)
         row2.addWidget(self.btn_compare)
@@ -259,51 +263,64 @@ class MainWindow(QMainWindow):
 
         # правая колонка: результаты
         right = QVBoxLayout()
-        box_r = QGroupBox("Результаты обучения")
+        box_r = QGroupBox("Результаты моделирования")
         lr = QVBoxLayout(box_r)
-        self.lbl_equation = QLabel("Модель не обучена.")
+        self.lbl_equation = QLabel("Модель не построена.")
         self.lbl_equation.setWordWrap(True)
         self.lbl_equation.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         lr.addWidget(self.lbl_equation)
-        self.tbl_coef = QTableWidget(0, 2)
-        self.tbl_coef.setHorizontalHeaderLabels(["Признак", "Коэффициент"])
-        self.tbl_coef.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.tbl_coef.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        lr.addWidget(self.tbl_coef)
         self.lbl_metrics = QLabel("")
         self.lbl_metrics.setStyleSheet("font-size: 14px;")
         lr.addWidget(self.lbl_metrics)
+        self.tbl_coef = QTableWidget(0, 2)
+        self.tbl_coef.setHorizontalHeaderLabels(["Признак", "Коэффициент"])
+        self.tbl_coef.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.tbl_coef.verticalHeader().setVisible(False)
+        self.tbl_coef.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.tbl_coef.setVisible(False)
+        lr.addWidget(self.tbl_coef)
+        lr.addStretch()
         right.addWidget(box_r)
 
-        lay.addLayout(left, 2)
-        lay.addLayout(right, 3)
+        # левая колонка – фиксированной ширины, результаты занимают остальное
+        left_w = QWidget()
+        left_w.setLayout(left)
+        left_w.setMaximumWidth(470)
+        left.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(left_w)
+        lay.addLayout(right, 1)
         return w
 
     # ---------- вкладка «Сравнение» ----------
     def _build_compare_tab(self):
         w = QWidget()
         lay = QVBoxLayout(w)
-        lay.addWidget(QLabel("Сравнение алгоритмов на одном наборе данных "
+        lay.addWidget(QLabel("Сравнение моделей на одном наборе данных "
                              "(одинаковое разбиение и параметры). "
                              "Лучшие значения выделены."))
         self.tbl_compare = QTableWidget(0, 4)
-        self.tbl_compare.setHorizontalHeaderLabels(["Алгоритм", "MSE", "MAE", "R²"])
+        self.tbl_compare.setHorizontalHeaderLabels(["Модель", "MSE", "MAE", "R²"])
         self.tbl_compare.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.tbl_compare.verticalHeader().setVisible(False)
         self.tbl_compare.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.tbl_compare.setMaximumHeight(170)
         lay.addWidget(self.tbl_compare)
+        lay.addStretch()
         return w
 
     # ---------- вкладка «Прогноз» ----------
     def _build_predict_tab(self):
         w = QWidget()
         lay = QVBoxLayout(w)
-        lay.addWidget(QLabel("Введите значения всех входных признаков обученной модели:"))
+        lay.addWidget(QLabel("Введите значения всех входных признаков построенной модели:"))
         self.predict_form_box = QGroupBox("Наблюдение")
+        self.predict_form_box.setMaximumWidth(560)
         self.predict_form = QFormLayout(self.predict_form_box)
         lay.addWidget(self.predict_form_box)
         self.btn_predict = QPushButton("Вычислить прогноз")
+        self.btn_predict.setProperty("kind", "primary")
         self.btn_predict.clicked.connect(self.on_predict)
-        lay.addWidget(self.btn_predict)
+        lay.addWidget(self.btn_predict, alignment=Qt.AlignmentFlag.AlignLeft)
         self.lbl_prediction = QLabel("")
         self.lbl_prediction.setStyleSheet("font-size: 16px; font-weight: bold;")
         lay.addWidget(self.lbl_prediction)
@@ -346,7 +363,7 @@ class MainWindow(QMainWindow):
         else:
             self.cmb_missing.setEnabled(False)
 
-        # прогноз, график и сохранение — только после обучения
+        # прогноз, график и сохранение – только после построения модели
         self.tabs.setTabEnabled(TAB_PREDICT, self.trained)
         self.tabs.setTabEnabled(TAB_PLOT, self.trained)
         for a in (self.act_save_txt, self.act_save_csv, self.act_save_png):
@@ -395,8 +412,9 @@ class MainWindow(QMainWindow):
         self.result = None
         self.results = []
         self.tbl_compare.setRowCount(0)
-        self.lbl_equation.setText("Модель не обучена.")
+        self.lbl_equation.setText("Модель не построена.")
         self.tbl_coef.setRowCount(0)
+        self.tbl_coef.setVisible(False)
         self.lbl_metrics.setText("")
 
         # информация и предпросмотр 100 строк
@@ -412,10 +430,14 @@ class MainWindow(QMainWindow):
         self.tbl_preview.setHorizontalHeaderLabels([str(c) for c in prev.columns])
         for i, row in enumerate(prev.itertuples(index=False)):
             for j, v in enumerate(row):
-                text = "—" if v != v else str(v)   # NaN показываем прочерком
+                text = "–" if v != v else str(v)   # NaN показываем прочерком
                 self.tbl_preview.setItem(i, j, QTableWidgetItem(text))
+        # немного столбцов – растягиваем на всю ширину, много – по содержимому
+        mode = (QHeaderView.ResizeMode.Stretch if prev.shape[1] <= 10
+                else QHeaderView.ResizeMode.ResizeToContents)
+        self.tbl_preview.horizontalHeader().setSectionResizeMode(mode)
 
-        # списки признаков: по умолчанию цель — последний числовой столбец
+        # списки признаков: по умолчанию цель – последний числовой столбец
         numeric = ds.numeric_columns()
         self.cmb_target.blockSignals(True)
         self.cmb_target.clear()
@@ -489,7 +511,7 @@ class MainWindow(QMainWindow):
         self._show_result(self.result)
         self._build_prediction_form(self.params.features)
         self._draw_plot()
-        self.statusBar().showMessage(f"Модель обучена за {dt:.2f} с.")
+        self.statusBar().showMessage(f"Модель построена за {dt:.2f} с.")
 
     @safe
     def on_compare(self):
@@ -509,11 +531,10 @@ class MainWindow(QMainWindow):
                 b = best(vals)
                 for i, row in enumerate(rows):
                     if row[j] == b:
-                        # светло-зелёный фон + тёмный жирный текст: читается
-                        # и в светлой, и в тёмной теме Windows
+                        # светло-синий фон и синий жирный текст (цвета темы)
                         cell = self.tbl_compare.item(i, j)
-                        cell.setBackground(QColor("#b9e6b9"))
-                        cell.setForeground(QColor("#0b3d0b"))
+                        cell.setBackground(QColor(theme.BLUE_LIGHT))
+                        cell.setForeground(QColor(theme.BLUE))
                         font = cell.font()
                         font.setBold(True)
                         cell.setFont(font)
@@ -531,6 +552,12 @@ class MainWindow(QMainWindow):
         for i, (n, v) in enumerate(zip(names, values)):
             self.tbl_coef.setItem(i, 0, QTableWidgetItem(n))
             self.tbl_coef.setItem(i, 1, QTableWidgetItem(f"{v:.6f}"))
+        # высота таблицы – по числу строк (при большом числе признаков – прокрутка)
+        self.tbl_coef.resizeRowsToContents()
+        h = self.tbl_coef.horizontalHeader().height() + 4 + sum(
+            self.tbl_coef.rowHeight(i) for i in range(len(names)))
+        self.tbl_coef.setFixedHeight(min(h, 420))
+        self.tbl_coef.setVisible(True)
         m = r.metrics
         self.lbl_metrics.setText(
             f"Показатели на тестовой выборке ({len(r.y_test)} наблюдений):<br>"

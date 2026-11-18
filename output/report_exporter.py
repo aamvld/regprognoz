@@ -1,4 +1,4 @@
-"""Класс ReportExporter — сохранение результатов в TXT, CSV и PNG.
+"""Класс ReportExporter – сохранение результатов в TXT, CSV и PNG.
 
 Файлы записываются только по пути, который выбрал пользователь
 (п. 4.2.4 ТЗ). Исходный файл данных не изменяется.
@@ -43,7 +43,7 @@ class ReportExporter:
              else "замена средним значением"),
             "",
             "2. Параметры модели",
-            f"   Алгоритм: {ALGORITHM_NAMES[p.algorithm]}",
+            f"   Модель: {ALGORITHM_NAMES[p.algorithm]}",
         ]
         if p.algorithm in ("ridge", "lasso"):
             lines.append(f"   Параметр регуляризации α: {p.alpha}")

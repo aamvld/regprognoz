@@ -40,8 +40,8 @@
     core/models.py             RegressionModel, LinearModel, RidgeModel, LassoModel
     core/solvers.py            LeastSquaresEstimator — МНК, Ridge, Lasso на numpy
     core/metrics.py            MetricsCalculator, Metrics — MSE, MAE, R²
-    core/result.py             ModelResult — результат обучения
-    core/experiment.py         ExperimentService — обучение, сравнение, прогноз
+    core/result.py             ModelResult — результат построения модели
+    core/experiment.py         ExperimentService — построение, сравнение, прогноз
     output/plot_builder.py     PlotBuilder — график «факт – прогноз»
     output/report_exporter.py  ReportExporter — TXT, CSV, PNG
     tests/                     модульные тесты
